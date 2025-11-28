@@ -1,0 +1,23 @@
+[project]
+name = "omnicrack"
+version = "0.1.0"
+description = "Meta-wrapper for hash cracking and wifi security auditing"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "sqlalchemy>=2.0.0",
+    "scapy>=2.5.0",
+]
+
+[project.scripts]
+omnicrack = "omnicrack.main:app"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
