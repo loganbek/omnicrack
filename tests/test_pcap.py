@@ -6,7 +6,7 @@ from omnicrack.pcap import PcapAnalyzer
 def analyzer():
     return PcapAnalyzer()
 
-@patch("scapy.all.rdpcap")
+@patch("omnicrack.pcap.rdpcap")
 def test_analyze_success(mock_rdpcap, analyzer):
     # Mock packets
     # Packet 1: Beacon (contains SSID)
@@ -17,7 +17,11 @@ def test_analyze_success(mock_rdpcap, analyzer):
     
     # Packet 2: EAPOL (Handshake)
     eapol = MagicMock()
-    eapol.haslayer.side_effect = lambda layer: layer.__name__ == "EAPOL"
+    def side_effect(layer):
+        if isinstance(layer, str):
+            return layer == "EAPOL"
+        return layer.__name__ == "EAPOL"
+    eapol.haslayer.side_effect = side_effect
     eapol.addr1 = "AA:BB:CC:DD:EE:FF" # Station
     eapol.addr2 = "00:11:22:33:44:55" # BSSID
     
@@ -30,11 +34,15 @@ def test_analyze_success(mock_rdpcap, analyzer):
     assert result["handshake_found"] is True
     assert result["station"] == "AA:BB:CC:DD:EE:FF"
 
-@patch("scapy.all.rdpcap")
+@patch("omnicrack.pcap.rdpcap")
 def test_analyze_no_handshake(mock_rdpcap, analyzer):
     # Only beacon
     beacon = MagicMock()
-    beacon.haslayer.return_value = True
+    def side_effect(layer):
+        if isinstance(layer, str):
+            return layer in ["Dot11Beacon", "Dot11"]
+        return layer.__name__ in ["Dot11Beacon", "Dot11"]
+    beacon.haslayer.side_effect = side_effect
     beacon.info = b"TestWiFi"
     beacon.addr2 = "00:11:22:33:44:55"
     

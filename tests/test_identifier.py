@@ -25,6 +25,6 @@ def test_identify_bcrypt(identifier):
 
 def test_identify_unknown(identifier):
     # Garbage string
-    hash_str = "notahash"
+    hash_str = "This is definitely not a hash string!"
     results = identifier.identify(hash_str)
     assert results == []
