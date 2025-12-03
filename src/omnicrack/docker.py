@@ -71,3 +71,34 @@ class DockerManager:
         except Exception as e:
             # Return a dummy completed process with error
             return subprocess.CompletedProcess(args=cmd, returncode=1, stderr=str(e))
+
+    def run_hashcat_stream(self, args: List[str]):
+        """
+        Runs hashcat in a docker container and yields output line by line.
+        """
+        cmd = [
+            "docker", "run", "--rm", "-i", 
+            "-v", f"{subprocess.os.getcwd()}:/data",
+            self.image
+        ]
+        cmd.extend(args)
+        
+        try:
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1,
+                universal_newlines=True
+            )
+            
+            for line in process.stdout:
+                yield line
+                
+            process.wait()
+            if process.returncode != 0:
+                yield f"Error: Process exited with code {process.returncode}"
+                
+        except Exception as e:
+            yield f"Error: {str(e)}"

@@ -49,3 +49,23 @@ def test_run_hashcat(mock_run, docker_manager):
     assert "dizcza/docker-hashcat:latest" in call_args
     assert "-m" in call_args
     assert "0" in call_args
+
+@patch("subprocess.Popen")
+def test_run_hashcat_stream(mock_popen, docker_manager):
+    process_mock = MagicMock()
+    process_mock.stdout = iter(["Line 1\n", "Line 2\n"])
+    process_mock.wait.return_value = None
+    process_mock.returncode = 0
+    mock_popen.return_value = process_mock
+    
+    args = ["-m", "0", "hash.txt"]
+    output = list(docker_manager.run_hashcat_stream(args))
+    
+    assert len(output) == 2
+    assert output[0] == "Line 1\n"
+    assert output[1] == "Line 2\n"
+    
+    mock_popen.assert_called_once()
+    call_args = mock_popen.call_args[0][0]
+    assert "docker" in call_args
+    assert "run" in call_args

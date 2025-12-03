@@ -18,4 +18,4 @@
 
 ## Phase 4: The UI
 
-- [ ] detailed `Rich` dashboard with live hash-rate telemetry.
+- [x] detailed `Rich` dashboard with live hash-rate telemetry.
