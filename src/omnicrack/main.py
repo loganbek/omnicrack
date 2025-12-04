@@ -13,6 +13,7 @@ from omnicrack.identifier import HashIdentifier
 from omnicrack.pcap import PcapAnalyzer
 from omnicrack.docker import DockerManager
 from omnicrack.session import SessionManager
+from omnicrack.logic import map_hash_type_to_mode
 
 app = typer.Typer()
 console = Console()
@@ -87,18 +88,9 @@ def crack(
         
         if possible_types:
             console.print(f"[green]✔ Identified Hash Type(s): {', '.join(possible_types)}[/green]")
-            # Simple mapping logic for demo - in real world we need a robust mapper
-            if "MD5" in possible_types:
-                hash_type = "MD5"
-                hash_mode = "0"
-            elif "SHA-1" in possible_types:
-                hash_type = "SHA-1"
-                hash_mode = "100"
-            elif "Bcrypt" in possible_types:
-                hash_type = "Bcrypt"
-                hash_mode = "3200"
-            else:
-                console.print("[yellow]⚠ Could not map to specific Hashcat mode. Defaulting to 0 (MD5).[/yellow]")
+            hash_type, hash_mode = map_hash_type_to_mode(possible_types)
+            if hash_type.startswith("Unknown"):
+                console.print(f"[yellow]⚠ {hash_type}[/yellow]")
         else:
             console.print("[red]✘ Could not identify hash type.[/red]")
             # Continue anyway?
